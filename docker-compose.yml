@@ -1,6 +1,6 @@
 services:
   postgres:
-    images: postgres:18-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: liveboard
@@ -14,10 +14,10 @@ services:
   redis:
     image: redis:8-alpine
     restart: unless-stopped
-  ports:
-    - "6379:6379"
-  volumes:
-    - redis_data:/data
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   app:
     build: .
@@ -33,7 +33,7 @@ services:
 
 
   nginx:
-    images: nginx:alpine
+    image: nginx:alpine
     restart: unless-stopped
     ports:
       - "80:80"
