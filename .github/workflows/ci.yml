@@ -1,0 +1,68 @@
+name: CI
+
+
+on: 
+  push:
+    branches:[main,dev]
+  pull_request:
+  branches:[main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: liveboard
+          POSTGReS_PASSWORD: liveboard
+          POSTGRES_DB: liveboard
+        ports: 
+         - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        images: redis:8-alpine
+        ports: 
+          - 6379:6379
+
+      env:
+        DATABASE_URL: postgresql://liveboard:liveboard@localhost:5432/liveboard
+        REDIS_URL: redis://localhost:6379
+        NEXTAUTH_URL: http://localhost:3000
+        NEXTAUTH_SECRET: ci-secret-not-real
+
+
+      steps:
+        - uses: action/checkout@v4
+
+        - uses: action/setup-node@v4
+          with :
+            node-version: 24
+            cache: npm
+
+        - names: Install dependencies
+          run: npm ci
+        
+        - name: Generate Prisma client
+          run: npx prisma gemerate
+
+        - name: Type check          run: npx tsc --noEmit
+
+        - name: Lint
+          run: npm run Lint
+
+        - name: Run Migration
+          run: npx prisma migrate deploy
+
+        - name: Run Tests 
+          run: npm test --if-present
+
+        - name: Build
+          run: npm run build
+
