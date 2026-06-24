@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Session 
+
+model Session {
+  id        String       @id @default(cuid())
+  code      String       @unique
+  hodtId    String
+  state     SessionState @default(waiting)
+  createdAt DateTime     @default(now())
+
+  polls     Poll[]
+  questions Question[]
+
+  @@index([code])
+}
+
+enum SessionState {
+  waiting
+  poll_active
+  qa_active
+  ended
+}
+
+// poll 
+
+model Poll {
+  id         String   @id @default(cuid())
+  sessionId  String
+  questionId String
+  options    String[]
+  isActive   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  votes   Vote[]
+
+  @@index([sessionId])
+}
+
+// Vote 
+
+model Vote {
+  id              String   @id @default(cuid())
+  pollId          String
+  participantName String
+  option          String
+  createdAt       DateTime @default(now())
+
+  poll Poll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, participantName])
+}
+
+// Question
+model Question {
+  id              String   @id @default(cuid())
+  sessionId       String
+  participantName String
+  text            String
+  upvotes         Int
+  isAnswered      Boolean  @default(false)
+  isPinned        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([sessionId, upvotes(sort: Desc)])
+}
