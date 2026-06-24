@@ -1,0 +1,49 @@
+services:
+  postgres:
+    images: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: liveboard
+      POSTGRES_PASSWORD: liveboard
+      POSTGRES_DB: liveboard
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+  ports:
+    - "6379:6379"
+  volumes:
+    - redis_data:/data
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://liveboard:liveboard@postgres:5432/liveboard
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+
+  nginx:
+    images: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+
+
+
+volumes:
+  postgres_data:
+  redis_data:
