@@ -12,7 +12,7 @@ datasource db {
 model Session {
   id        String       @id @default(cuid())
   code      String       @unique
-  hodtId    String
+  hostId    String
   state     SessionState @default(waiting)
   createdAt DateTime     @default(now())
 
@@ -34,7 +34,7 @@ enum SessionState {
 model Poll {
   id         String   @id @default(cuid())
   sessionId  String
-  questionId String
+  question String
   options    String[]
   isActive   Boolean  @default(false)
   createdAt  DateTime @default(now())
@@ -65,7 +65,7 @@ model Question {
   sessionId       String
   participantName String
   text            String
-  upvotes         Int
+  upvotes         Int @default(0)
   isAnswered      Boolean  @default(false)
   isPinned        Boolean  @default(false)
   createdAt       DateTime @default(now())

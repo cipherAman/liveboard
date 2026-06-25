@@ -19,6 +19,7 @@
     "graphql": "^16.14.2",
     "ioredis": "^5.11.1",
     "lucide-react": "^1.21.0",
+    "nanoid": "^5.1.16",
     "next": "16.2.9",
     "radix-ui": "^1.6.0",
     "react": "19.2.4",
